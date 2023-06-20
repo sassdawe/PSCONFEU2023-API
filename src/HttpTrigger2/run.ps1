@@ -18,11 +18,22 @@ $table = Get-AzStorageTable -Name $env:TABLE_NAME -Context $ctx
 #region switch intent based on method
 switch ($Request.Method) {
     "GET" {
-        # Get all items
+        try {
+            $body = Get-StorageTableRow -table $table -partitionKey 'todo'
+            $statusCode = [HttpStatusCode]::OK
+        }
+        catch {
+            $body = @{ "errorMessage" = $_.Exception.Message }
+            $statusCode = [HttpStatusCode]::BadRequest
+        }
         
     }
     "POST" {
-        # Post a new item
+        if (-not $Request.Body) {
+            $statusCode = [HttpStatusCode]::BadRequest
+            $body = @{"errorMessage" = "No task provided" }
+            return
+        }
         
     }
     default {
